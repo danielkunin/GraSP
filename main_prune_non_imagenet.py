@@ -15,6 +15,7 @@ from utils.common_utils import (get_logger, makedirs, process_config, PresetLRSc
 from utils.data_utils import get_dataloader
 from utils.network_utils import get_network
 from pruner.GraSP import GraSP
+from pruner.SynFlow import SynFlow
 
 
 def get_args():
@@ -268,10 +269,18 @@ def main(config):
         mb.model.apply(weights_init)
         print("=> Applying weight initialization(%s)." % config.get('init_method', 'kaiming'))
         print("Iteration of: %d/%d" % (iteration, num_iterations))
-        masks = GraSP(mb.model, ratio, trainloader, 'cuda',
-                      num_classes=classes[config.dataset],
-                      samples_per_class=config.samples_per_class,
-                      num_iters=config.get('num_iters', 1))
+        if config.pruner == 'GraSP':
+            masks = GraSP(mb.model, ratio, trainloader, 'cuda',
+                          num_classes=classes[config.dataset],
+                          samples_per_class=config.samples_per_class,
+                          num_iters=config.get('num_iters', 1),
+                          eval_mode=config.get('eval_mode', False),
+                          negate_score=config.get('negate', False))
+        if config.pruner == 'SynFlow':
+            masks = SynFlow(mb.model, ratio, trainloader, 'cuda',
+                          num_classes=classes[config.dataset],
+                          samples_per_class=config.samples_per_class,
+                          num_iters=config.get('num_iters', 1))
         iteration = 0
         print('=> Using GraSP')
         # ========== register mask ==================

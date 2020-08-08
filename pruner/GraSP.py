@@ -46,12 +46,14 @@ def count_fc_parameters(net):
     return total
 
 
-def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True):
+def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True, eval_mode=False, negate=False):
     eps = 1e-10
     keep_ratio = 1-ratio
     old_net = net
 
     net = copy.deepcopy(net)  # .eval()
+    if eval_mode:
+        net.eval()
     net.zero_grad()
 
     weights = []
@@ -137,7 +139,10 @@ def GraSP(net, ratio, train_dataloader, device, num_classes=10, samples_per_clas
     old_modules = list(old_net.modules())
     for idx, layer in enumerate(net.modules()):
         if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
-            grads[old_modules[idx]] = -layer.weight.data * layer.weight.grad  # -theta_q Hg
+            if negate:
+                grads[old_modules[idx]] = layer.weight.data * layer.weight.grad  # theta_q Hg
+            else: 
+                grads[old_modules[idx]] = -layer.weight.data * layer.weight.grad  # -theta_q Hg
 
     # Gather all scores in a single vector and normalise
     all_scores = torch.cat([torch.flatten(x) for x in grads.values()])
