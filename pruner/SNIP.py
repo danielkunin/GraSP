@@ -48,10 +48,11 @@ def SNIP(net, keep_ratio, train_dataloader, device):
     loss = F.nll_loss(outputs, targets)
     loss.backward()
 
-    grads_abs = []
-    for layer in net.modules():
+    grads = dict()
+    modules = list(net.modules())
+    for idx, layer in enumerate(net.modules()):
         if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
-            grads_abs.append(torch.abs(layer.weight_mask.grad))
+            grads[modules[idx]] = torch.abs(layer.weight_mask.grad)
 
     # Gather all scores in a single vector and normalise
     all_scores = torch.cat([torch.flatten(x) for x in grads_abs])
@@ -62,9 +63,9 @@ def SNIP(net, keep_ratio, train_dataloader, device):
     threshold, _ = torch.topk(all_scores, num_params_to_keep, sorted=True)
     acceptable_score = threshold[-1]
 
-    keep_masks = []
-    for g in grads_abs:
-        keep_masks.append(((g / norm_factor) >= acceptable_score).float())
+    keep_masks = dict()
+    for m, g in grads.items():
+        keep_masks[m] = ((g / norm_factor) >= acceptable_score).float()
 
     print(torch.sum(torch.cat([torch.flatten(x == 1) for x in keep_masks])))
 
