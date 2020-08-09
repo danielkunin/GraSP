@@ -10,7 +10,7 @@
   "exception": "-1",
   "iterations": 1,
   "normalize": false,
-  "target_ratio": "10e-2.0",
+  "target_ratio": 0.99,
   "pruner": "SynFlow",
   "pruner_file": "SynFlow",
   "samples_per_class": 10,

@@ -10,7 +10,7 @@
   "exception": "-1",
   "iterations": 1,
   "normalize": false,
-  "target_ratio": "10e-3.0",
+  "target_ratio": 0.999,
   "pruner": "GraSP",
   "pruner_file": "GraSP",
   "samples_per_class": 10,
