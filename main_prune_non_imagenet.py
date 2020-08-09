@@ -15,6 +15,7 @@ from utils.common_utils import (get_logger, makedirs, process_config, PresetLRSc
 from utils.data_utils import get_dataloader
 from utils.network_utils import get_network
 from pruner.GraSP import GraSP
+from pruner.SNIP import SNIP
 from pruner.SynFlow import SynFlow
 
 
@@ -277,6 +278,9 @@ def main(config):
                           num_iters=config.get('num_iters', 1),
                           eval_mode=config.get('eval_mode', False),
                           negate=config.get('negate', False))
+        if config.pruner == 'SNIP':
+            print('=> Using SNIP')
+            masks = SNIP(mb.model, ratio, trainloader, 'cuda')
         if config.pruner == 'SynFlow':
             print('=> Using SynFlow')
             masks = SynFlow(mb.model, ratio, trainloader, 'cuda')

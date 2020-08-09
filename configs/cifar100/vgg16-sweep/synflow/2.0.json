@@ -1,0 +1,19 @@
+{
+  "exp_name": "cifar100_vgg16_SynFlow_comp_ratio_20",
+  "network": "vgg",
+  "depth": 16,
+  "dataset": "cifar100",
+  "batch_size": 128,
+  "epoch": "160",
+  "learning_rate": "0.1",
+  "weight_decay": "5e-4",
+  "exception": "-1",
+  "iterations": 1,
+  "normalize": false,
+  "target_ratio": 0.99,
+  "pruner": "SynFlow",
+  "pruner_file": "SynFlow",
+  "samples_per_class": 10,
+  "eval_mode": false,
+  "negate": false
+}
