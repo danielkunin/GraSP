@@ -34,7 +34,7 @@ def score(model, dataloader, device):
     for idx, layer in enumerate(model.modules()):
         if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
             scores[old_modules[idx]] = torch.clone(layer.weight.data * layer.weight.grad).detach().abs_()
-
+            layer.weight.grad.data.zero_()
     nonlinearize(model, signs)
 
     return scores
