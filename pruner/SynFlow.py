@@ -58,32 +58,16 @@ def apply_mask(model, masks):
             layer.weight.mul_(masks[old_modules[idx]])
 
 
-def SynFlow(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25, num_iters=1, T=200, reinit=True):
-    eps = 1e-10
-    keep_ratio = 1-ratio
-    old_net = net
+def SynFlow(net, ratio, train_dataloader, device):
 
-    net = copy.deepcopy(net).eval()
-    net.zero_grad()
+    net.eval()
 
-    weights = []
-    total_parameters = count_total_parameters(net)
-    fc_parameters = count_fc_parameters(net)
-
-    # rescale_weights(net)
-    for layer in net.modules():
-        if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
-            if isinstance(layer, nn.Linear) and reinit:
-                nn.init.xavier_normal(layer.weight)
-            weights.append(layer.weight)
-
-    # Prune model
     epochs = 100
     for epoch in tqdm(range(epochs)):
-        scores = score(model, train_dataloader, device)
-        sparsity = keep_ratio**((epoch + 1) / epochs) # Exponential
+        scores = score(net, train_dataloader, device)
+        sparsity = (1 - ratio)**((epoch + 1) / epochs)
         masks = mask(scores, sparsity)
-        apply_mask(model, masks)
+        apply_mask(net, masks)
 
 
-    return keep_masks
+    return masks
