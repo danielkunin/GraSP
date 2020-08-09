@@ -270,7 +270,7 @@ def main(config):
         print("=> Applying weight initialization(%s)." % config.get('init_method', 'kaiming'))
         print("Iteration of: %d/%d" % (iteration, num_iterations))
         if config.pruner == 'GraSP':
-        	print('=> Using GraSP')
+            print('=> Using GraSP')
             masks = GraSP(mb.model, ratio, trainloader, 'cuda',
                           num_classes=classes[config.dataset],
                           samples_per_class=config.samples_per_class,
@@ -278,7 +278,7 @@ def main(config):
                           eval_mode=config.get('eval_mode', False),
                           negate=config.get('negate', False))
         if config.pruner == 'SynFlow':
-        	print('=> Using SynFlow')
+            print('=> Using SynFlow')
             masks = SynFlow(mb.model, ratio, trainloader, 'cuda')
         iteration = 0
         # ========== register mask ==================
