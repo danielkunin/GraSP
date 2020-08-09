@@ -1,5 +1,5 @@
 {
-  "exp_name": "cifar100_vgg19_GraSP_prune_ratio_90",
+  "exp_name": "cifar100_vgg19_GraSP_comp_ratio_25",
   "network": "vgg",
   "depth": 19,
   "dataset": "cifar100",
