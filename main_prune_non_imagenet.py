@@ -280,7 +280,9 @@ def main(config):
                           negate=config.get('negate', False))
         if config.pruner == 'SNIP':
             print('=> Using SNIP')
-            masks = SNIP(mb.model, ratio, trainloader, 'cuda')
+            masks = SNIP(mb.model, ratio, trainloader, 'cuda',
+                          num_classes=classes[config.dataset],
+                          samples_per_class=config.samples_per_class)
         if config.pruner == 'SynFlow':
             print('=> Using SynFlow')
             masks = SynFlow(mb.model, ratio, trainloader, 'cuda')

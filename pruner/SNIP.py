@@ -6,6 +6,28 @@ import copy
 import types
 
 
+def SNIP_fetch_data(dataloader, num_classes, samples_per_class):
+    datas = [[] for _ in range(num_classes)]
+    labels = [[] for _ in range(num_classes)]
+    mark = dict()
+    dataloader_iter = iter(dataloader)
+    while True:
+        inputs, targets = next(dataloader_iter)
+        for idx in range(inputs.shape[0]):
+            x, y = inputs[idx:idx+1], targets[idx:idx+1]
+            category = y.item()
+            if len(datas[category]) == samples_per_class:
+                mark[category] = True
+                continue
+            datas[category].append(x)
+            labels[category].append(y)
+        if len(mark) == num_classes:
+            break
+
+    X, y = torch.cat([torch.cat(_, 0) for _ in datas]), torch.cat([torch.cat(_) for _ in labels]).view(-1)
+    return X, y
+
+
 def snip_forward_conv2d(self, x):
         return F.conv2d(x, self.weight * self.weight_mask, self.bias,
                         self.stride, self.padding, self.dilation, self.groups)
@@ -15,14 +37,14 @@ def snip_forward_linear(self, x):
         return F.linear(x, self.weight * self.weight_mask, self.bias)
 
 
-def SNIP(net, ratio, train_dataloader, device):
+def SNIP(net, ratio, train_dataloader, device, num_classes=10, samples_per_class=25):
     eps = 1e-10
     keep_ratio = 1-ratio
     old_net = net
     # TODO: shuffle?
 
     # Grab a single batch from the training dataset
-    inputs, targets = next(iter(train_dataloader))
+    inputs, targets = SNIP_fetch_data(train_dataloader, num_classes, samples_per_class)
     inputs = inputs.to(device)
     targets = targets.to(device)
 
@@ -35,7 +57,6 @@ def SNIP(net, ratio, train_dataloader, device):
     for layer in net.modules():
         if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
             layer.weight_mask = nn.Parameter(torch.ones_like(layer.weight))
-            nn.init.xavier_normal_(layer.weight)
             layer.weight.requires_grad = False
 
         # Override the forward methods:
