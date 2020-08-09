@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import math
 import copy
 import types
+from tqdm import tqdm
 
 def score(model, dataloader, device):
     @torch.no_grad()
@@ -38,19 +39,19 @@ def score(model, dataloader, device):
 
     return scores
 
-def mask(scores, sparsity):
+def mask(scores, sparsity, device):
     global_scores = torch.cat([torch.flatten(v) for v in scores.values()])
     k = int((1.0 - sparsity) * global_scores.numel())
     keep_masks = dict()
     if not k < 1:
         threshold, _ = torch.kthvalue(global_scores, k)
         for mask, score in scores.items():
-            zero = torch.tensor([0.]).to(mask.device)
-            one = torch.tensor([1.]).to(mask.device)
-            keep_masks[m] = torch.where(score <= threshold, zero, one)
+            zero = torch.tensor([0.]).to(device)
+            one = torch.tensor([1.]).to(device)
+            keep_masks[mask] = torch.where(score <= threshold, zero, one)
     return keep_masks
 
-
+@torch.no_grad()
 def apply_mask(model, masks):
     old_modules = list(model.modules())
     for idx, layer in enumerate(model.modules()):
@@ -66,7 +67,7 @@ def SynFlow(net, ratio, train_dataloader, device):
     for epoch in tqdm(range(epochs)):
         scores = score(net, train_dataloader, device)
         sparsity = (1 - ratio)**((epoch + 1) / epochs)
-        masks = mask(scores, sparsity)
+        masks = mask(scores, sparsity, device)
         apply_mask(net, masks)
 
 
