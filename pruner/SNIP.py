@@ -15,7 +15,10 @@ def snip_forward_linear(self, x):
         return F.linear(x, self.weight * self.weight_mask, self.bias)
 
 
-def SNIP(net, keep_ratio, train_dataloader, device):
+def SNIP(net, ratio, train_dataloader, device):
+    eps = 1e-10
+    keep_ratio = 1-ratio
+    old_net = net
     # TODO: shuffle?
 
     # Grab a single batch from the training dataset
@@ -49,14 +52,14 @@ def SNIP(net, keep_ratio, train_dataloader, device):
     loss.backward()
 
     grads = dict()
-    modules = list(net.modules())
+    modules = list(old_net.modules())
     for idx, layer in enumerate(net.modules()):
         if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear):
             grads[modules[idx]] = torch.abs(layer.weight_mask.grad)
 
     # Gather all scores in a single vector and normalise
-    all_scores = torch.cat([torch.flatten(x) for x in grads_abs])
-    norm_factor = torch.sum(all_scores)
+    all_scores = torch.cat([torch.flatten(x) for x in grads.values()])
+    norm_factor = torch.sum(all_scores) + eps
     all_scores.div_(norm_factor)
 
     num_params_to_keep = int(len(all_scores) * keep_ratio)
@@ -67,6 +70,6 @@ def SNIP(net, keep_ratio, train_dataloader, device):
     for m, g in grads.items():
         keep_masks[m] = ((g / norm_factor) >= acceptable_score).float()
 
-    print(torch.sum(torch.cat([torch.flatten(x == 1) for x in keep_masks])))
+    print(torch.sum(torch.cat([torch.flatten(x == 1) for x in keep_masks.values()])))
 
     return(keep_masks)
