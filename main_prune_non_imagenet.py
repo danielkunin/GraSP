@@ -277,10 +277,7 @@ def main(config):
                           eval_mode=config.get('eval_mode', False),
                           negate=config.get('negate', False))
         if config.pruner == 'SynFlow':
-            masks = SynFlow(mb.model, ratio, trainloader, 'cuda',
-                          num_classes=classes[config.dataset],
-                          samples_per_class=config.samples_per_class,
-                          num_iters=config.get('num_iters', 1))
+            masks = SynFlow(mb.model, ratio, trainloader, 'cuda')
         iteration = 0
         print('=> Using GraSP')
         # ========== register mask ==================
