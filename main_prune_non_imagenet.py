@@ -168,10 +168,10 @@ def test(net, loader, criterion, epoch, writer, iteration):
 def train_once(mb, net, trainloader, testloader, writer, config, ckpt_path, learning_rate, weight_decay, num_epochs,
                iteration, logger):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=weight_decay)
+    optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, nesterov=True, weight_decay=weight_decay)
     lr_schedule = {0: learning_rate,
-                   int(num_epochs * 0.5): learning_rate * 0.1,
-                   int(num_epochs * 0.75): learning_rate * 0.01}
+                   60: learning_rate * 0.1,
+                   120: learning_rate * 0.01}
     lr_scheduler = PresetLRScheduler(lr_schedule)
     best_acc = 0
     best_epoch = 0
