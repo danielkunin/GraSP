@@ -1,7 +1,7 @@
 {
-  "exp_name": "cifar100_resnet_SynFlow_comp_ratio_35",
-  "network": "resnet",
-  "depth": 20,
+  "exp_name": "cifar100_vgg19_GraSP_comp_ratio_50",
+  "network": "vgg",
+  "depth": 19,
   "dataset": "cifar100",
   "batch_size": 128,
   "epoch": "160",
@@ -10,9 +10,9 @@
   "exception": "-1",
   "iterations": 1,
   "normalize": false,
-  "target_ratio": 0.99968377223,
-  "pruner": "SynFlow",
-  "pruner_file": "SynFlow",
+  "target_ratio": 0.99999,
+  "pruner": "GraSP",
+  "pruner_file": "GraSP",
   "samples_per_class": 10,
   "eval_mode": false,
   "negate": false
